@@ -24,7 +24,7 @@ contract SimpleDN404 is DN404, Ownable {
         _symbol = symbol_;
 
         address mirror = address(new DN404Mirror(msg.sender));
-        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror);
+        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror, 1);
     }
 
     function name() public view override returns (string memory) {

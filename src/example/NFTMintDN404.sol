@@ -71,7 +71,7 @@ contract NFTMintDN404 is DN404, Ownable {
         allowlistPrice = allowlistPrice_;
 
         address mirror = address(new DN404Mirror(msg.sender));
-        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror);
+        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror, 1);
     }
 
     function mint(uint256 amount) public payable isValidMint(publicPrice, amount) {

@@ -7,7 +7,7 @@ import "../../../src/DN404Mirror.sol";
 contract MockDN404OnlyERC20 is DN404 {
     constructor() {
         address mirror = address(new DN404Mirror(msg.sender));
-        _initializeDN404(0, address(this), mirror);
+        _initializeDN404(0, address(this), mirror, 1);
     }
 
     function name() public view virtual override returns (string memory) {

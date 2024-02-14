@@ -52,7 +52,7 @@ contract MockDN404 is DN404 {
         address initialSupplyOwner,
         address mirrorNFTContract
     ) public {
-        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirrorNFTContract);
+        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirrorNFTContract, 1);
     }
 
     function ownerAt(uint256 id) public view returns (address) {

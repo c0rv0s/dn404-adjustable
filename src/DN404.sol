@@ -34,6 +34,9 @@ abstract contract DN404 {
     /*                        CUSTOM ERRORS                       */
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
 
+    /// @dev Thrown when the tokensPerNft is set to zero.
+    error ZeroTokensPerNft();
+
     /// @dev Thrown when attempting to double-initialize the contract.
     error DNAlreadyInitialized();
 
@@ -77,7 +80,9 @@ abstract contract DN404 {
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
 
     /// @dev Amount of token balance that is equal to one NFT.
-    uint256 internal constant _WAD = 10 ** 18;
+    /// @notice This is extended in this fork so that it is multiplied by tokensPerNft.
+    /// This lets you have 18 decimals and multiple full tokens per NFT.
+    uint256 internal immutable _WAD = 10 ** 18;
 
     /// @dev The maximum token ID allowed for an NFT.
     uint256 internal constant _MAX_TOKEN_ID = 0xffffffff;
@@ -120,6 +125,8 @@ abstract contract DN404 {
         uint32 numAliases;
         // Next token ID to assign for an NFT mint.
         uint32 nextTokenId;
+        // Number of ERC20 tokens required to mint an NFT.
+        uint96 tokensPerNft;
         // Total supply of minted NFTs.
         uint32 totalNFTSupply;
         // Total supply of tokens.
@@ -160,7 +167,8 @@ abstract contract DN404 {
     function _initializeDN404(
         uint256 initialTokenSupply,
         address initialSupplyOwner,
-        address mirror
+        address mirror,
+        uint96 tokensPerNft
     ) internal virtual {
         DN404Storage storage $ = _getDN404Storage();
 
@@ -171,6 +179,9 @@ abstract contract DN404 {
 
         $.nextTokenId = 1;
         $.mirrorERC721 = mirror;
+
+        if (tokensPerNft == 0) revert ZeroTokensPerNft();
+        $.tokensPerNft = tokensPerNft;
 
         if (initialTokenSupply > 0) {
             if (initialSupplyOwner == address(0)) revert TransferToZeroAddress();
@@ -318,11 +329,11 @@ abstract contract DN404 {
             if (toAddressData.flags & _ADDRESS_DATA_SKIP_NFT_FLAG == 0) {
                 Uint32Map storage toOwned = $.owned[to];
                 uint256 toIndex = toAddressData.ownedLength;
-                uint256 toEnd = toBalance / _WAD;
+                uint256 toEnd = toBalance / ($.tokensPerNft * _WAD);
                 _PackedLogs memory packedLogs = _packedLogsMalloc(_zeroFloorSub(toEnd, toIndex));
 
                 if (packedLogs.logs.length != 0) {
-                    uint256 maxNFTId = $.totalSupply / _WAD;
+                    uint256 maxNFTId = $.totalSupply / ($.tokensPerNft * _WAD);
                     uint32 toAlias = _registerAndResolveAlias(toAddressData, to);
                     uint256 id = $.nextTokenId;
                     $.totalNFTSupply += uint32(packedLogs.logs.length);
@@ -373,7 +384,8 @@ abstract contract DN404 {
 
             Uint32Map storage fromOwned = $.owned[from];
             uint256 fromIndex = fromAddressData.ownedLength;
-            uint256 nftAmountToBurn = _zeroFloorSub(fromIndex, fromBalance / _WAD);
+            uint256 nftAmountToBurn =
+                _zeroFloorSub(fromIndex, fromBalance / ($.tokensPerNft * _WAD));
 
             if (nftAmountToBurn != 0) {
                 $.totalNFTSupply -= uint32(nftAmountToBurn);
@@ -430,11 +442,13 @@ abstract contract DN404 {
             fromAddressData.balance = uint96(t.fromBalance);
             toAddressData.balance = uint96(t.toBalance = toAddressData.balance + amount);
 
-            t.nftAmountToBurn = _zeroFloorSub(t.fromOwnedLength, t.fromBalance / _WAD);
+            t.nftAmountToBurn =
+                _zeroFloorSub(t.fromOwnedLength, t.fromBalance / ($.tokensPerNft * _WAD));
 
             if (toAddressData.flags & _ADDRESS_DATA_SKIP_NFT_FLAG == 0) {
                 if (from == to) t.toOwnedLength = t.fromOwnedLength - t.nftAmountToBurn;
-                t.nftAmountToMint = _zeroFloorSub(t.toBalance / _WAD, t.toOwnedLength);
+                t.nftAmountToMint =
+                    _zeroFloorSub(t.toBalance / ($.tokensPerNft * _WAD), t.toOwnedLength);
             }
 
             _PackedLogs memory packedLogs = _packedLogsMalloc(t.nftAmountToBurn + t.nftAmountToMint);
@@ -459,7 +473,7 @@ abstract contract DN404 {
                 uint256 toIndex = t.toOwnedLength;
                 uint256 toEnd = toIndex + t.nftAmountToMint;
                 uint32 toAlias = _registerAndResolveAlias(toAddressData, to);
-                uint256 maxNFTId = $.totalSupply / _WAD;
+                uint256 maxNFTId = $.totalSupply / ($.tokensPerNft * _WAD);
                 uint256 id = $.nextTokenId;
                 $.totalNFTSupply += uint32(t.nftAmountToMint);
                 toAddressData.ownedLength = uint32(toEnd);
@@ -517,10 +531,10 @@ abstract contract DN404 {
         AddressData storage fromAddressData = _addressData(from);
         AddressData storage toAddressData = _addressData(to);
 
-        fromAddressData.balance -= uint96(_WAD);
+        fromAddressData.balance -= uint96($.tokensPerNft * _WAD);
 
         unchecked {
-            toAddressData.balance += uint96(_WAD);
+            toAddressData.balance += uint96($.tokensPerNft * _WAD);
 
             _set($.oo, _ownershipIndex(id), _registerAndResolveAlias(toAddressData, to));
             delete $.tokenApprovals[id];
@@ -534,7 +548,7 @@ abstract contract DN404 {
             _set($.oo, _ownedIndex(id), uint32(n));
         }
 
-        emit Transfer(from, to, _WAD);
+        emit Transfer(from, to, $.tokensPerNft * _WAD);
     }
 
     /*«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-*/

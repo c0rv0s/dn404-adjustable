@@ -9,6 +9,10 @@ DN404 is an implementation of a co-joined ERC20 and ERC721 pair.
 - Transfers on one side will be reflected on the other side.
 - Pretty optimized.
 
+## Adjustable
+
+This fork of DN404 adds a `tokensPerNft` variable that can be set in the initializer. This allows you to set the number of ERC20 tokens that correspond to an NFT.
+
 ## Installation
 
 To install with [**Foundry**](https://github.com/gakonst/foundry):

@@ -22,3 +22,22 @@ contract SimpleDN404Script is Script {
         vm.stopBroadcast();
     }
 }
+
+contract DeployBonsai is Script {
+    uint256 private constant _WAD = 1000000000000000000;
+
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+
+        // SimpleDN404 constructor args -- name, symbol, initialSupply, owner
+        // CHANGE THESE VALUES TO SUIT YOUR NEEDS
+        string memory name = "BONSAI";
+        string memory symbol = "BONSAI";
+        uint96 initialSupply = 1_000_000_000; // 1bil;
+        address owner = address(this);
+
+        new SimpleDN404(name, symbol, uint96(initialSupply * _WAD), owner);
+        vm.stopBroadcast();
+    }
+}

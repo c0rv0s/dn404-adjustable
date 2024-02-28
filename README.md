@@ -51,15 +51,25 @@ This is **experimental software** and is provided on an "as is" and "as availabl
 
 We **do not give any warranties** and **will not be liable for any loss** incurred through any use of this codebase.
 
-While DN404 has been heavily tested, there may be parts that may exhibit unexpected emergent behavior when used with other code, or may break in future Solidity versions.  
+While DN404 has been heavily tested, there may be parts that may exhibit unexpected emergent behavior when used with other code, or may break in future Solidity versions.
 
-Please always include your own thorough tests when using DN404 to make sure it works correctly with your code.  
+Please always include your own thorough tests when using DN404 to make sure it works correctly with your code.
 
 ## Upgradability
 
-Most contracts in DN404 are compatible with both upgradeable and non-upgradeable (i.e. regular) contracts. 
+Most contracts in DN404 are compatible with both upgradeable and non-upgradeable (i.e. regular) contracts.
 
 Please call any required internal initialization methods accordingly.
+
+## Deploy BONSAI
+```
+forge script script/DeploySimpleDN404.s.sol:DeployBonsai --rpc-url "https://polygon-mumbai.g.alchemy.com/v2/57QgTavabHtRuUKqDGvOic7FIQpgqS2z" -vvvv --skip .t.sol --legacy --broadcast
+```
+
+and if you need to deploy gaslite to testnet....
+```
+forge script script/DeployGasliteDrop.s.sol:DeployGasliteDrop --rpc-url "https://polygon-mumbai.g.alchemy.com/v2/57QgTavabHtRuUKqDGvOic7FIQpgqS2z" -vvvv --skip .t.sol --legacy --broadcast
+```
 
 ## Acknowledgements
 

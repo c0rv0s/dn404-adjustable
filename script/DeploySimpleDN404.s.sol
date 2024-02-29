@@ -35,7 +35,7 @@ contract DeployBonsai is Script {
         string memory name = "BONSAI";
         string memory symbol = "BONSAI";
         uint96 initialSupply = 1_000_000_000; // 1bil;
-        address owner = address(this);
+        address owner = address(0x28ff8e457feF9870B9d1529FE68Fbb95C3181f64); // TODO: treasury
 
         new SimpleDN404(name, symbol, uint96(initialSupply * _WAD), owner);
         vm.stopBroadcast();

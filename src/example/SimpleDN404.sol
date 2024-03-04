@@ -12,6 +12,8 @@ contract SimpleDN404 is DN404, Ownable {
     string private _symbol;
     string private _baseURI;
 
+    uint96 private _tokensPerNft = 100_000;
+
     constructor(
         string memory name_,
         string memory symbol_,
@@ -24,7 +26,7 @@ contract SimpleDN404 is DN404, Ownable {
         _symbol = symbol_;
 
         address mirror = address(new DN404Mirror(msg.sender));
-        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror, 1);
+        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror, _tokensPerNft);
     }
 
     function name() public view override returns (string memory) {

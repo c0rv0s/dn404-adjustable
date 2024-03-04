@@ -27,15 +27,13 @@ contract DeployBonsai is Script {
     uint256 private constant _WAD = 1000000000000000000;
 
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        // SimpleDN404 constructor args -- name, symbol, initialSupply, owner
-        // CHANGE THESE VALUES TO SUIT YOUR NEEDS
-        string memory name = "BONSAI";
+        string memory name = "Bonsai Token";
         string memory symbol = "BONSAI";
         uint96 initialSupply = 1_000_000_000; // 1bil;
-        address owner = address(0x28ff8e457feF9870B9d1529FE68Fbb95C3181f64); // TODO: treasury
+        address owner = address(0xFf9730b6534087d07692c1262F916521966244E6); // SAFE WALLET
 
         new SimpleDN404(name, symbol, uint96(initialSupply * _WAD), owner);
         vm.stopBroadcast();
